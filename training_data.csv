@@ -1,0 +1,10 @@
+description,category
+"Cannot login to VPN after password reset",Access Issue
+"Please create new admin account for HR manager",Admin Activities
+"Customer address is incorrect in CRM and needs correction",Data Fix
+"Application crashes when uploading PDF",Technical Issue
+"Salesforce webhook sync is failing",Integration Issues
+"How do I generate monthly report?",User Guide
+"Need exception approval for out-of-process refund",Process Exception
+"Dashboard totals are wrong in weekly KPI report",Reporting
+"Need help understanding ticket workflow",Support
