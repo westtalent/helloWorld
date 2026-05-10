@@ -89,3 +89,27 @@ print(result)
 5. **Inference**: `classify_ticket` loads model, predicts label + probability, and returns category/confidence.
 
 All processing runs **internally and offline**, with no cloud/API dependency.
+
+---
+
+## 5) Bi-Weekly Operations Report Web Page
+
+A ready-to-use static report page is available at:
+
+- `biweekly_report.html`
+
+### Features
+
+- Matches the same presentation structure as your existing slide.
+- Editable fields for period, owner, incident counts, risks, and activities.
+- Saves report history in browser localStorage.
+- Keeps the latest **5 reports** (covers approximately **last 10 weeks** of bi-weekly updates).
+- Load/delete previous reports and export current report as JSON.
+
+### Open in browser
+
+```bash
+xdg-open biweekly_report.html
+```
+
+Or just double-click the file in your file explorer.

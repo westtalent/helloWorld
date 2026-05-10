@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bi-Weekly Operations Report</title>
+  <style>
+    :root{--red:#920000;--green:#00a84f;--light:#e9e5e6;--section:#d3b0a3;--text:#111}
+    body{font-family:Arial,sans-serif;background:#f3f3f3;color:var(--text);margin:0;padding:16px}
+    .container{max-width:1280px;margin:0 auto;background:#fff;border:1px solid #bbb;padding:12px}
+    .top{display:grid;grid-template-columns:1fr 2fr 220px;gap:10px;align-items:center}
+    .logo,.right-logo{background:var(--red);color:#fff;padding:24px;text-align:center;font-weight:700}
+    h1{margin:0;text-align:center;font-size:46px;letter-spacing:1px}
+    .app-row{margin-top:10px;display:grid;grid-template-columns:2fr 1fr}
+    .app-name{font-size:56px;font-weight:700;padding:4px 10px;border:1px solid #cfcfcf;background:#efefef}
+    .owner{font-size:40px;background:var(--red);color:#fff;display:flex;align-items:center;padding:0 12px}
+    .section{margin-top:10px;background:var(--section);font-size:34px;padding:6px 10px;font-weight:700}
+    table{width:100%;border-collapse:collapse}
+    th{background:var(--red);color:#fff;padding:10px;font-size:30px}
+    td{background:var(--light);vertical-align:top;padding:10px;height:220px;font-size:28px}
+    .resolved-table th,.resolved-table td{font-size:20px;padding:6px;height:auto}
+    .resolved-table th{background:#5da9de}
+    .resolved-table td{background:#f7f7f7}
+    .resolved-table tr:last-child td{font-weight:700}
+    .green{background:var(--green)!important}
+    .list li{margin-bottom:10px}
+    .split th{width:50%}
+    .split td{height:260px}
+    textarea,input[type="text"],input[type="number"],input[type="date"]{width:100%;box-sizing:border-box;font-size:20px;padding:8px}
+    .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+    button{padding:10px 12px;font-size:18px;cursor:pointer}
+    .history{margin-top:16px;border-top:3px solid #ddd;padding-top:12px}
+    .history-item{display:flex;justify-content:space-between;align-items:center;background:#fafafa;border:1px solid #ddd;padding:8px;margin-bottom:8px}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="top">
+    <div class="logo">Application Logo Optional</div>
+    <h1 id="periodTitle">FROM_DATE TO TO_DATE</h1>
+    <div class="right-logo">Company Logo</div>
+  </div>
+
+  <div class="controls">
+    <input id="fromDate" type="date" />
+    <input id="toDate" type="date" />
+    <input id="applicationName" type="text" placeholder="Application Name" />
+    <input id="owner" type="text" placeholder="Application Owner" />
+  </div>
+
+  <div class="app-row">
+    <div class="app-name" id="appNameView">APPLICATION NAME</div>
+    <div class="owner" id="ownerView">Application Owner: XXXX XXXXXX</div>
+  </div>
+
+  <div class="section">SUPPORT/INCIDENT REPORT</div>
+  <table>
+    <tr>
+      <th>Pending from last period</th>
+      <th>New</th>
+      <th class="green">Resolved</th>
+      <th>Pending after this period</th>
+      <th>Issue/Risks/Improvement</th>
+    </tr>
+    <tr>
+      <td><input id="pendingLast" type="number" value="0" /></td>
+      <td><input id="newCount" type="number" value="0" /></td>
+      <td>
+        <table class="resolved-table">
+          <tr><th>Type</th><th>Count</th></tr>
+          <tr><td><input id="r1t" type="text" value="Issues Code Fix" /></td><td><input id="r1c" type="number" value="0" /></td></tr>
+          <tr><td><input id="r2t" type="text" value="Data Fix" /></td><td><input id="r2c" type="number" value="0" /></td></tr>
+          <tr><td><input id="r3t" type="text" value="Data Extract" /></td><td><input id="r3c" type="number" value="0" /></td></tr>
+          <tr><td><input id="r4t" type="text" value="Support tickets" /></td><td><input id="r4c" type="number" value="0" /></td></tr>
+          <tr><td>Total</td><td id="resolvedTotal">0</td></tr>
+        </table>
+      </td>
+      <td><input id="pendingAfter" type="number" value="0" /></td>
+      <td><textarea id="risks" rows="6" placeholder="Add bullet points..."></textarea></td>
+    </tr>
+  </table>
+
+  <div class="section">ENHANCEMENTS/DEMANDS PROGRESS UPDATE</div>
+  <table class="split">
+    <tr><th>Completed Activities</th><th>Planned Activities for current period</th></tr>
+    <tr>
+      <td><textarea id="completed" rows="10"></textarea></td>
+      <td><textarea id="planned" rows="10"></textarea></td>
+    </tr>
+  </table>
+
+  <div class="controls">
+    <button id="previewBtn">Update Preview</button>
+    <button id="saveBtn">Save Bi-Weekly Report</button>
+    <button id="newBtn">New Empty Report</button>
+    <button id="exportBtn">Export Current JSON</button>
+  </div>
+
+  <div class="history">
+    <h2>History (last 10 weeks / latest 5 bi-weekly reports)</h2>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'biweekly_ops_reports_v1';
+const MAX_REPORTS = 5;
+const ids = ['fromDate','toDate','applicationName','owner','pendingLast','newCount','pendingAfter','r1t','r1c','r2t','r2c','r3t','r3c','r4t','r4c','risks','completed','planned'];
+
+function value(id){return document.getElementById(id).value;}
+function setValue(id,val=''){document.getElementById(id).value=val;}
+
+function getReport(){
+  return Object.fromEntries(ids.map(id=>[id,value(id)]));
+}
+
+function loadReport(report){ ids.forEach(id=>setValue(id,report[id]||'')); updatePreview(); }
+
+function updatePreview(){
+  document.getElementById('periodTitle').textContent = `${value('fromDate') || 'FROM_DATE'} TO ${value('toDate') || 'TO_DATE'}`;
+  document.getElementById('appNameView').textContent = value('applicationName') || 'APPLICATION NAME';
+  document.getElementById('ownerView').textContent = `Application Owner: ${value('owner') || 'XXXX XXXXXX'}`;
+  const total = ['r1c','r2c','r3c','r4c'].reduce((n,id)=>n+(Number(value(id))||0),0);
+  document.getElementById('resolvedTotal').textContent = total;
+}
+
+function getHistory(){return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');}
+function setHistory(data){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
+
+function saveReport(){
+  const history = getHistory();
+  const report = getReport();
+  report.savedAt = new Date().toISOString();
+  history.unshift(report);
+  setHistory(history.slice(0,MAX_REPORTS));
+  renderHistory();
+  alert('Saved report successfully.');
+}
+
+function renderHistory(){
+  const history = getHistory();
+  const root = document.getElementById('historyList');
+  root.innerHTML = '';
+  if(!history.length){root.textContent='No reports saved yet.';return;}
+  history.forEach((item,idx)=>{
+    const row = document.createElement('div'); row.className='history-item';
+    const label = `${item.fromDate || 'NA'} → ${item.toDate || 'NA'} | ${item.applicationName || 'Unnamed'} | saved ${new Date(item.savedAt).toLocaleString()}`;
+    row.innerHTML = `<span>${label}</span><span><button data-load='${idx}'>Load</button> <button data-del='${idx}'>Delete</button></span>`;
+    root.appendChild(row);
+  });
+}
+
+document.addEventListener('click',(e)=>{
+  const l = e.target.getAttribute('data-load');
+  const d = e.target.getAttribute('data-del');
+  if(l!==null){loadReport(getHistory()[Number(l)]);}
+  if(d!==null){const h=getHistory(); h.splice(Number(d),1); setHistory(h); renderHistory();}
+});
+
+document.getElementById('previewBtn').onclick = updatePreview;
+document.getElementById('saveBtn').onclick = saveReport;
+document.getElementById('newBtn').onclick = ()=>{ids.forEach(i=>setValue(i,'')); setValue('pendingLast',0);setValue('newCount',0);setValue('pendingAfter',0);['r1c','r2c','r3c','r4c'].forEach(i=>setValue(i,0)); updatePreview();};
+document.getElementById('exportBtn').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(getReport(),null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'biweekly-report.json'; a.click();
+};
+ids.forEach(id=>document.getElementById(id).addEventListener('input',updatePreview));
+updatePreview(); renderHistory();
+</script>
+</body>
+</html>
